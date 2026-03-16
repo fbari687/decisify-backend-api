@@ -1,27 +1,32 @@
-name: Deploy Go API
+name: Build and Deploy Go API
 
 on:
   push:
     branches:
       - main
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v5.0.2
         with:
           go-version: '1.22'
 
-      - name: Build binary
+      - name: Download dependencies
+        run: go mod tidy
+
+      - name: Build Go binary
         run: |
-          go mod tidy
-          go build -o decisify-api
+          GOOS=linux GOARCH=amd64 go build -o decisify-api
 
       - name: Upload binary to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -32,7 +37,7 @@ jobs:
           source: "decisify-api"
           target: "/home/apps/decisify-api"
 
-      - name: Restart service
+      - name: Restart API service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -40,3 +45,4 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             sudo systemctl restart decisify-api
+            sudo systemctl status decisify-api --no-pager

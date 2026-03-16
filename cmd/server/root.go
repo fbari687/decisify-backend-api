@@ -18,11 +18,7 @@ func Execute() {
 
 	app := fiber.New()
 
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: cfg.Cors,
-		AllowMethods: "GET,POST,PUT,DELETE",
-		AllowHeaders: "Origin, Content-Type, Accept",
-	}))
+	app.Use(cors.New())
 
 	app.Use(limiter.New(limiter.Config{
 		Max:        10,

@@ -8,6 +8,12 @@ import (
 
 func SetupRoutes(app *fiber.App, aiHandler handler.AIHandler) {
 
+	app.Get("/health", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"status": "ok",
+		})
+	})
+
 	api := app.Group("/api")
 
 	ai := api.Group("/ai")
